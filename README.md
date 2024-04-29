@@ -15,7 +15,7 @@ Para iniciar este projeto sera necessária a instalação das seguintes ferramen
 - [Python](https://www.python.org/downloads/)
 - DBT
 
-## Acessos Necessários:
+## :computer: Acessos Necessários:
 
 Você irá necessitar de um usuário e uma senha habilitados via SSH. Esta solicitação se dá via e-mail a empresa para que sejam criados os seguintes acessos:
 
