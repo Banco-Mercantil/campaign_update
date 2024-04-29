@@ -48,10 +48,7 @@ Clique no ``Enter`` para que o terminal acesse a pasta indicada no comando anter
 
 Uma nova IDE do *Visual Studio Code* será aberta no projeto desejado ``dbt_efet_campanhas_incentivo_rede_mai24 ``. Para validar isso, o *VS code* deverá possuir uma ramificação de arquivos similar ao da imagem a seguir:\
 
-![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/866130d0-20cb-4f17-a672-c7f21c36089a)
-
-
-<img width="173" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/4196eb9a-9331-41a9-ab21-04bbe0978440">
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/866130d0-20cb-4f17-a672-c7f21c36089a) <img width="173" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/4196eb9a-9331-41a9-ab21-04bbe0978440">
 
 Na etapa seguinte, iremos alterar alguns paramêtros de configuração para ajustar o arquivo ao periodo do mês vigente, neste caso, maio.\
 Na ramificação de arquivos, a pasta ``parametros`` é composta por alguns arquivos ``.sql ``. No arquivo denominado ``periodos_camp.sql`` é definido duas variaveis para marcar o ínicio e o fim de cada campanha. Essas variáveis deveram ser atualizadas com a data de inicio e fim do mês vigente, ou seja, o período que compreende a nova campanha que se inicia.
