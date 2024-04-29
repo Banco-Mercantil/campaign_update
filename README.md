@@ -101,14 +101,17 @@ Partindo desta premissa, vamos acrescentar um perfil a este arquivo, remetendo a
 
 Portanto, com o arquivo ``profiles.yml`` aberto no *VS code*, procure pelo perfil da campanha que se encerra, ``dbt_efet_campanhas_incentivo_rede_abr24:``, e copie todo o trecho refente a ela. 
 
-
 <img width="281" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c8229f6b-2cf4-4339-907f-2f9345239122">
 
+Ao final deste arquivo, cole o trecho copiado e ajuste o nome do perfil para o mesmo nome da nova campanha que se inicia, ou seja, o nome do novo projeto *DBT*: ``dbt_efet_campanhas_incentivo_rede_mai24: ``. Já no parâmetro ``schema``, atualize seu valor com ambiente de desenvolvimento: ``CAMP_INCENTIVO__DEV ``. Para os demais, mantenha as mesmas configurações, visto que, a nova campanha será executada com as mesmas credenciais de banco de dados e esquemas da anterior.  
 
+<img width="231" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/67f58053-3b12-4525-9f06-d61704d196c4">
 
-Outro detalhe importante é que o perfil dbt_blog deve ser especificado no arquivo dbt_project.yml como um perfil padrão. Nas próximas seções, discutiremos o que é e como o arquivo dbt_project.yml funciona.
+Feito as alterações no arquivo ``periodos_camp.sql``, salve-o com o atalho ``Ctrl + s ``.
 
+Outro detalhe importante é que o perfil ``dbt_efet_campanhas_incentivo_rede_abr24`` deve ser especificado no arquivo ``dbt_project.yml``, contido dentro do novo projeto, como um perfil padrão. Nas próximas seções, discutiremos o que é e como o arquivo ``dbt_project.yml`` funciona.
 
+<img width="541" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ca260b0c-a42c-48a5-84fc-20c4b27df61b">
 
 
 
