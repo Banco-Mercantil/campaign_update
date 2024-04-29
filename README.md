@@ -48,7 +48,7 @@ Clique no ``Enter`` para que o terminal acesse a pasta indicada no comando anter
 
 Uma nova IDE do *Visual Studio Code* será aberta no projeto desejado ``dbt_efet_campanhas_incentivo_rede_mai24 ``. Para validar isso, o *VS code* deverá possuir uma ramificação de arquivos similar ao da imagem a seguir:\
 
-![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/866130d0-20cb-4f17-a672-c7f21c36089a) <img width="173" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/4196eb9a-9331-41a9-ab21-04bbe0978440">
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/866130d0-20cb-4f17-a672-c7f21c36089a)
 
 Na etapa seguinte, iremos alterar alguns paramêtros de configuração para ajustar o arquivo ao periodo do mês vigente, neste caso, maio.\
 Na ramificação de arquivos, a pasta ``parametros`` é composta por alguns arquivos ``.sql ``. No arquivo denominado ``periodos_camp.sql`` é definido duas variaveis para marcar o ínicio e o fim de cada campanha. Essas variáveis deveram ser atualizadas com a data de inicio e fim do mês vigente, ou seja, o período que compreende a nova campanha que se inicia.
@@ -91,7 +91,22 @@ Feito as alterações no arquivo ``periodos_camp.sql``, salve-o com o atalho ``C
 
 Caso você já tenha inicializado outros projetos *DBTs*, existirá em seu diretório, ``C:\Users\B045523``, uma pasta denomidada ``.dbt``. Nela, conterá dois arquivos essenciais: ``.user.yml`` e ``profiles.yml``.
 
-O segundo, ``profiles.yml``, é o arquivo é responsável por controlar os diferentes perfis/profiles para as diferentes conexões com os bancos de dados, como ambiente de desenvolvimento e produção. Este arquivo, normalmente, é criado, uma vez dado o comando ``dbt init``, fora do projeto para evitar credenciais que sejam confidenciais. Você pode encontrar esse arquivo no diretório ~/.dbt/.
+O segundo, ``profiles.yml``, é o arquivo é responsável por controlar os diferentes perfis/profiles para as diferentes conexões com os bancos de dados, como ambiente de desenvolvimento e produção. Este arquivo, normalmente, é criado fora do projeto para evitar credenciais que sejam confidenciais, uma vez dado o comando ``dbt init``.
+
+<img width="443" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/f132fc74-31fb-44b2-993b-c341fdcaff33">
+
+Na imagem acima, é possível observar que temos um perfil chamado ``dbt_dominios`` e um destino chamado ``dev``, por padrão, o destino refere-se a ``dev`` com as configurações de conexão do banco de dados. Além disso, é possível criar um ou mais perfis e alvos (*target*), permitindo trabalhar com diferentes ambientes.
+
+Partindo desta premissa, vamos acrescentar um perfil a este arquivo, remetendo a nova campanha. Este processo é necessário, visto que o novo projeto foi clonado e não inicializado pelo método convenciona, no qual é gerando todas as conexões e configurações de parâmetros pela linha de comando ``dbt init``. 
+
+Portanto, com o arquivo ``profiles.yml`` aberto no *VS code*, procure pelo perfil da campanha que se encerra, ``dbt_efet_campanhas_incentivo_rede_abr24:``, e copie todo o trecho refente a ela. 
+
+
+<img width="281" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c8229f6b-2cf4-4339-907f-2f9345239122">
+
+
+
+Outro detalhe importante é que o perfil dbt_blog deve ser especificado no arquivo dbt_project.yml como um perfil padrão. Nas próximas seções, discutiremos o que é e como o arquivo dbt_project.yml funciona.
 
 
 
