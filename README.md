@@ -2,9 +2,11 @@
 
 O real objetivo deste trabalho é demonstrar, passo a passo, como realizar a virada de campanha do Banco Mercantil.
 
-Ao final de cada mês, uma campanha de incentivo se encerra e outra é iniciada. Essa atualização, se trata, basicamente, de algumas mudanças de parâmetros e dos dados. Nessa fase, novas metas são recalculadas e a visualiazão do dashboard passa a considerar apenas os dados gerados no período que compreende o mês atual. 
+Ao final de cada mês, uma campanha de incentivo se encerra e outra é iniciada. A campanha que se encerrou ficará em apuração o durante o período da campanha que se inicia. Ou seja, ao final do mês de abril, por exemplo, a campanha de maio é criada e parametrizada como vigente, enquanto a campanha de abril é posta em apuração. Ao iniciar o mês de maio, a nova campanha é iniciada e durante este mês, no qual a campanha de maio esta vigente, a campanha do mês de abril ficará sendo apurada durante todo este período para bonificação dos colaboradores.
 
-Por tanto, o que se executou ou não da campanha que se encerra, será armazenado como histórico e o mês que se inicia terá novas metas calculadas. Neste caso, os paramêtros passarão a considerar apenas o que for executado dentro do novo período, assim é possível acompanharmos o efetivado do mês durante o período da campanha vigente.
+Essa atualização de uma campanha para outra, se trata, basicamente, de algumas mudanças de parâmetros e de alguns dados. Nessa fase, novas metas são recalculadas e a visualiazão do dashboard passa a considerar apenas os dados gerados no período que compreende o mês atual. 
+
+Por tanto, o que se executou ou não da campanha que se encerra, será armazenado como histórico e o mês que se inicia terá novas metas calculadas. Neste caso, os paramêtros passarão a considerar apenas o que for executado dentro do novo período, assim é possível acompanharmos o efetivado do mês durante o período da campanha que segue como vigente.
 
 ## 🔨 Ferramentas Necessárias:
 
@@ -47,7 +49,59 @@ code .
 ``
 
 Uma nova IDE do *Visual Studio Code* será aberta no projeto desejado ``dbt_efet_campanhas_incentivo_rede_mai24 ``. Para validar isso, o *VS code* deverá possuir uma ramificação de arquivos similar ao da imagem a seguir:\
+
 <img width="173" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/4196eb9a-9331-41a9-ab21-04bbe0978440">
+
+Na etapa seguinte, iremos alterar alguns paramêtros de configuração para ajustar o arquivo ao periodo do mês vigente, neste caso, maio.\
+Na ramificação de arquivos, a pasta ``parametros`` é composta por alguns arquivos ``.sql ``. No arquivo denominado ``periodos_camp.sql`` é definido duas variaveis para marcar o ínicio e o fim de cada campanha. Essas variáveis deveram ser atualizadas com a data de inicio e fim do mês vigente, ou seja, o período que compreende a nova campanha que se inicia.\
+
+Paramêtro de abril:
+
+```
+WITH PARAMETROS AS
+(
+  SELECT 
+    CAST ('2024-04-01' AS DATE) AS INICIO_CAMP,
+    CAST ('2024-04-30' AS DATE) AS FIM_CAMP
+)
+...
+```
+
+Parametro atualizado para o mês de maio:
+
+```
+WITH PARAMETROS AS
+(
+  SELECT 
+    CAST ('2024-05-01' AS DATE) AS INICIO_CAMP,
+    CAST ('2024-05-31' AS DATE) AS FIM_CAMP
+)
+...
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
