@@ -95,6 +95,10 @@ Neste documento, iremos atualizar o nome do perfil que o DBT deverá usar no pro
 
 <img width="728" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/a8fd6bf3-75e2-4147-8a6c-fbd12af3b048">
 
+No parâmetro ``schema``, atualize seu valor com ambiente de desenvolvimento: ``CAMP_INCENTIVO__DEV ``.
+
+<img width="683" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/4cd509bb-3acd-4872-8aa1-98eb5422581c">
+
 Nesta fase, caso você já tenha inicializado outros projetos *DBTs*, existirá em seu diretório, ``C:\Users\B045523``, uma pasta denomidada ``.dbt``. Nela, conterá dois arquivos essenciais: ``.user.yml`` e ``profiles.yml``.
 
 O segundo, ``profiles.yml``, é o arquivo responsável por controlar os diferentes *perfis/profiles* para as diferentes conexões com os bancos de dados, como ambiente de desenvolvimento e produção. Este arquivo, normalmente, é criado, fora do projeto para evitar credenciais que sejam confidenciais, uma vez dado o comando ``dbt init``.
@@ -125,6 +129,15 @@ Logo, vamos retornar ao projeto clonado ``dbt_efet_campanhas_incentivo_rede_mai2
 Portanto, toda referência contida no arquivo ``dbt_project.yml`` ao projeto de origem ``dbt_efet_campanhas_incentivo_rede_abr24`` deverá ser atualizado com o valor do perfil que acabamos de criar: ``dbt_efet_campanhas_incentivo_rede_mai24``.
 
 <img width="842" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c16d853d-844b-4227-8eaf-a36976f73820">
+
+Feito as alterações no projeto ``dbt_efet_campanhas_incentivo_rede_mai24``, salve-o com o atalho ``Ctrl + s ``.\
+
+## Executando o nosso modelo:
+
+Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de dados e exibir informações para fins de depuração. Ao final da execução, uma mensagem de sucesso deverá ser exibida.
+
+<img width="321" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/01804f47-3d4e-4cbc-aed9-fa2b67656ce7">
+
 
 
 
