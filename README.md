@@ -89,7 +89,13 @@ Feito as alterações no arquivo ``periodos_camp.sql``, salve-o com o atalho ``C
 
 ### Configurando a Conexão com o Banco de Dados:
 
-Caso você já tenha inicializado outros projetos *DBTs*, existirá em seu diretório, ``C:\Users\B045523``, uma pasta denomidada ``.dbt``. Nela, conterá dois arquivos essenciais: ``.user.yml`` e ``profiles.yml``.
+Ainda com o nosso projeto aberto na IDE *VS Code*, na raiz do projeto *DBT*, abra o arquivo denomominado: ``profiles.yml``. Este arquivo permite selecionar credenciais exclusivas de suas fontes e destinos de dados, aqui são descritos os perfis de banco de dados que serão conectados. 
+
+Neste documento, iremos atualizar o nome do perfil que o DBT deverá usar no projeto para: ``dbt_efet_campanhas_incentivo_rede_mai24:``.
+
+<img width="728" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/a8fd6bf3-75e2-4147-8a6c-fbd12af3b048">
+
+Nesta fase, caso você já tenha inicializado outros projetos *DBTs*, existirá em seu diretório, ``C:\Users\B045523``, uma pasta denomidada ``.dbt``. Nela, conterá dois arquivos essenciais: ``.user.yml`` e ``profiles.yml``.
 
 O segundo, ``profiles.yml``, é o arquivo responsável por controlar os diferentes *perfis/profiles* para as diferentes conexões com os bancos de dados, como ambiente de desenvolvimento e produção. Este arquivo, normalmente, é criado, fora do projeto para evitar credenciais que sejam confidenciais, uma vez dado o comando ``dbt init``.
 
@@ -99,17 +105,34 @@ Na imagem acima, é possível observar que temos um perfil chamado ``dbt_dominio
 
 Partindo desta premissa, vamos acrescentar um perfil a este arquivo, remetendo a nova campanha. Este processo é necessário, visto que o novo projeto foi clonado e não inicializado pelo método convencional, no qual é gerado todas as conexões e configurações de parâmetros pela linha de comando ``dbt init``. 
 
-Portanto, com o arquivo ``profiles.yml`` aberto no *VS code*, procure pelo perfil da campanha que se encerra, ``dbt_efet_campanhas_incentivo_rede_abr24:``, e copie todo o trecho referente a ela. 
+Portanto, com o arquivo ``C:\Users\B045523\profiles.yml`` aberto no *VS code*, procure pelo perfil da campanha que se encerra, ``dbt_efet_campanhas_incentivo_rede_abr24:``, e copie todo o trecho referente a ela. 
 
 <img width="281" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c8229f6b-2cf4-4339-907f-2f9345239122">
 
-Ao final deste arquivo, cole o trecho copiado e ajuste o nome do perfil para o mesmo nome da nova campanha que se inicia, ou seja, o nome do novo projeto *DBT*: ``dbt_efet_campanhas_incentivo_rede_mai24: ``. Já no parâmetro ``schema``, atualize seu valor com ambiente de desenvolvimento: ``CAMP_INCENTIVO__DEV ``. Para os demais, mantenha as mesmas configurações, visto que, a nova campanha será executada com as mesmas credenciais de banco de dados e esquemas da anterior.  
+Ao final deste arquivo, cole o trecho copiado e ajuste o nome do perfil para o mesmo nome da nova campanha que se inicia, ou seja, o nome do novo projeto *DBT*: ``dbt_efet_campanhas_incentivo_rede_mai24:``. Já no parâmetro ``schema``, atualize seu valor com ambiente de desenvolvimento: ``CAMP_INCENTIVO__DEV ``. Para os demais, mantenha as mesmas configurações, visto que, a nova campanha será executada com as mesmas credenciais de banco de dados e esquemas da anterior.  
 
 <img width="231" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/67f58053-3b12-4525-9f06-d61704d196c4">
 
-Feito as alterações no arquivo ``periodos_camp.sql``, salve-o com o atalho ``Ctrl + s ``.
+Feito as alterações no arquivo ``C:\Users\B045523\profiles.yml``, salve-o com o atalho ``Ctrl + s ``.\
+Neste momento os ajustes de conexão foram concluídos.
 
-Outro detalhe importante é que o perfil ``dbt_efet_campanhas_incentivo_rede_abr24`` deve ser especificado no arquivo ``dbt_project.yml``, contido dentro do novo projeto, como um perfil padrão. Nas próximas seções, discutiremos o que é e como o arquivo ``dbt_project.yml`` funciona.
+### Configurando o arquivo dbt_project.yml:
+
+A próxima etapa requer a configuração do arquivo ``dbt_project.yml`` do nosso projeto. Todo projeto *DBT* possui este arquivo para configurar informações como nome do projeto, diretórios, perfis e tipo de materialização.
+
+Logo, vamos retornar ao projeto clonado ``dbt_efet_campanhas_incentivo_rede_mai24`` e abrir o arquivo ``dbt_project.yml``. Aqui, iremos especificar o perfil ``dbt_efet_campanhas_incentivo_rede_mai24``, criado no arquivo ``C:\Users\B045523\profiles.yml`` que acabamos de salvar, no qual o *DBT* irá utilizar para este projeto.
+
+Portanto, toda referência contida no arquivo ``dbt_project.yml`` ao projeto de origem ``dbt_efet_campanhas_incentivo_rede_abr24`` deverá ser atualizado com o valor do perfil que acabamos de criar: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+<img width="842" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c16d853d-844b-4227-8eaf-a36976f73820">
+
+
+
+
+
+
+
+
 
 <img width="541" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ca260b0c-a42c-48a5-84fc-20c4b27df61b">
 
