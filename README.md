@@ -25,6 +25,13 @@ Você irá necessitar de um usuário e uma senha habilitados via SSH. Esta solic
 - Devops 
 - Airflow
 
+## Material de apoio:
+
+O presente projeto foi instruido pelo seguinte vídeo de apoio:
+
+- [Vídeo de apoio - Parte 1](https://drive.google.com/file/d/1yXN4XdE1xfPpvXiAhqj_w6fHLLhqmqSN/view?usp=sharing)
+- [Vídeo de apoio - Parte 2](https://drive.google.com/file/d/1BW0A9dx1G62odT5OPcNRbzcugwunsO4H/view?usp=sharing)
+
 ## 🚀 Inicializando o projeto:
 
 Após todos os acessos liberados e as ferramentas necessárias instaladas, navegue no explorador de arquivos de sua máquina até a pasta: ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede``. Para simplificar a criação de um novo projeto *DBT*, iremos clonar o projeto mais atual desta pasta e gerar uma cópia deste arquivo neste mesmo diretório.
@@ -132,6 +139,8 @@ Portanto, toda referência contida no arquivo ``dbt_project.yml`` ao projeto de 
 
 Feito as alterações no projeto ``dbt_efet_campanhas_incentivo_rede_mai24``, salve-o com o atalho ``Ctrl + s ``.
 
+Nesta etapa, exclua a pasta ``target`` do projeto. Ela será gerada novamente com os parâmetros corretos, assim que executar o projeto.
+
 ## Executando o nosso modelo:
 
 Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de dados e exibir informações para fins de depuração. Ao final da execução, uma mensagem de sucesso deverá ser exibida.
@@ -179,14 +188,99 @@ Nesta etapa, o sistema irá abrir um navegador da *AWS*, autorize a conexão pel
 
 <img width="329" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/e14052ca-0c29-4cbe-abb6-8fc0f32b4f79">
 
+Você poderá fechar o navegador neste momento e retornar ao *VS Code*. Após logado, o primeiro passo a ser feito é executar o comando ``pull`` para que os arquivos e configurações que constam no repositório sejam carregados para a sua máquina. 
 
+Utilize o atalho ``Ctrl + Shift + G`` para acessar a guia de controle do código-fonte. Clique nos *três pontinhos* e selecione a opção *Efetuar Pull*. 
 
+<img width="685" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/fd8a5e2e-3369-414c-bd63-6beeb5b86d7c">
 
+Feito isso, vamos abrir o arquivo python equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
 
+<img width="306" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/6e3580c1-596c-4de8-b376-b5fd00e7a6b1">
 
+Aqui iremos gerenciar quais DAGs iremos manter a atualização recorrente por meio do agendamento. Neste arquivo iremos parar a atualização da campanha de março e manter a de abril. Ao final do arquivo iremos comentar o seguinte trecho de cógido:
 
+```
+task_dbt_campanha_mar24 = KubernetesPodOperator(
+  task_id="dbt_efet_campanhas_incentivo_rede_mar24",
+  name="dbt_efet_campanhas_incentivo_rede_mar24",
+  image="841714811245.dkr.ecr.us-east-2.amazonaws.com/dbt_efet_campanhas_incentivo_rede_mar24:v1",
+  namespace="processing",        
+  is_delete_operator_pod=True,
+  #node_selector={"app": "airflow"},
+  image_pull_policy="Always",
+  #do_xcom_push=True,
+  in_cluster=True
+)
+```
 
+```
+  inicio >> task_dbt_campanha_abr24
+  inicio >> task_dbt_campanha_mar24
+  
+  task_dbt_campanha_abr24 >> task_dbt_campanha_hist 
+  task_dbt_campanha_mar24 >> task_dbt_campanha_hist 
+  
+  task_dbt_campanha_hist >> fim
+```
 
+Já a linha de código, ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim``, que está comentada iremos descomentar, deixando o arquivo desta forma:
+
+<img width="675" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/52cacfca-ee32-4d28-bb72-212e345f161b">
+
+Feito as alterações no projeto, iremos executar o comando ``Commit`` para salvar as modificações no *Airflow*. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+
+<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
+
+Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
+
+<img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
+
+Nesta fase do projeto, para garantir que os dados referentes ao mês de abril não sejam exibidos e armazenados duplicados na base *histórico* é necessário que realizamos uma limpeza nas tabelas, eliminando os resíduos do mês de abril, restando apenas os dados do mês da campanha vigente, maio.
+
+Para isso, utilizaremos a seguintes instruções SQL no *Snowflake*, disponíveis no arquivo: ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\EXECUTAR_MIG_SCHEMAS_CAMPANHA.txt``:
+
+```
+-- TRANSFERE TABELA DE METAS DE EMPRESTIMO
+
+TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_metas__individuais;
+
+    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_metas__individuais   
+
+        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_metas__individuais;
+
+-- TRANSFERE TABELA DE PARTICIPANTES POR DIA UTIL        
+
+TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int__participantes_dia_util;
+
+    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int__participantes_dia_util   
+
+        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int__participantes_dia_util;
+
+-- TRANSFERE TABELA DE METAS DE DPZ
+
+TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_dpz__metas;
+
+    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_dpz__metas   
+
+        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_dpz__metas;
+
+-- TRANSFERE TABELA DE METAS DE SERVIÇOS 
+
+TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_meta__geral;
+
+    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_meta__geral   
+
+        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_meta__geral;
+
+-- TRANSFERE TABELA DE PRODUÇÃO DE SERVIÇOS
+
+TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_prod__geral;
+
+    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_prod__geral   
+
+        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_prod__geral;
+```
 
 
 
