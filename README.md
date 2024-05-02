@@ -282,10 +282,27 @@ TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos
         SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_prod__geral;
 ```
 
+Agora que a atualização da campanha de março foi paralizada. Vamos navegar pelo repositório devops ``MB.AWS.BIZ.GED`` para o arquivo ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Aqui, nós iremos renomear o arquivo referente ao mês que teve sua atualização no Airflow paralizada, no caso, março, para o mês da campanha que se inicia, maio.
 
+Nome anterior: ``dbt_efet_campanhas_incentivo_rede_mar24``
 
+Nome atualizado: ``dbt_efet_campanhas_incentivo_rede_mai24``
 
+Feito isso, iremos excluir a pasta ``models`` de dentro do projeto que acabamos de renomear. Através do *Explorador de Arquivos* da nossa máquina, iremos até o projeto *DBT* o qual trabalhos as etapas anteriores, copiar a pasta ``models`` de lá, retornar ao *VS Code* com a conexão remota *SSH* e colar no projeto a pasta novamente.
 
+A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+<img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
+
+Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+Já no arquivo ``profiles.yml``, iremos alterar o perfil para referenciar maio, ``dbt_efet_campanhas_incentivo_rede_mai24``, e o *esquema* será atualizado com o valor ``CAMP_INCENTIVO_REDE_VIGENTE``.
+
+<img width="573" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/3da5d00a-5e56-49c2-a46d-895bd98ed960">
+
+Abra este mesmo arquivo ``profiles.yml``, porém, do projeto ``dbt_efet_campanhas_incentivo_rede_abr24``, o qual esta entrando em apuração, e atualize o parâmetro *esquema* para ``CAMP_INCENTIVO_REDE_APURAC``.
+
+<img width="311" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/841adcd6-9cb8-48c8-9321-287657707bde">
 
 
 
