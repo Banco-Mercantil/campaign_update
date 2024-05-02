@@ -130,7 +130,7 @@ Portanto, toda referência contida no arquivo ``dbt_project.yml`` ao projeto de 
 
 <img width="842" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/c16d853d-844b-4227-8eaf-a36976f73820">
 
-Feito as alterações no projeto ``dbt_efet_campanhas_incentivo_rede_mai24``, salve-o com o atalho ``Ctrl + s ``.\
+Feito as alterações no projeto ``dbt_efet_campanhas_incentivo_rede_mai24``, salve-o com o atalho ``Ctrl + s ``.
 
 ## Executando o nosso modelo:
 
@@ -146,8 +146,6 @@ Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de
 
 
 
-
-<img width="541" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ca260b0c-a42c-48a5-84fc-20c4b27df61b">
 
 
 
