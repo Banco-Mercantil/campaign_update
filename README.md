@@ -180,7 +180,7 @@ O sistema, novamente, irá se solicitar a senha, informe-a e na sequência dê o
 
 <img width="960" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/34f59ccc-3967-4a2b-8418-0c475fbc7998">
 
-Conectato remotamente a nuvem, é necessário logar a AWS para fazer qualquer alteração no *Airflow*. Nesta fase, digite, então, a linha de comando ``aws sso login``.Um pop-up será exibido, e nele, clique o botão *Abrir*.
+Conectato remotamente a nuvem, é necessário logar a AWS para fazer qualquer alteração no *Airflow*. Nesta fase, digite, então, a linha de comando ``aws sso login``. Um pop-up será exibido, e nele, clique o botão *Abrir*.
 
 <img width="292" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/bad2ea14-77a8-422d-8a16-b6402388a3b6">
 
@@ -362,7 +362,7 @@ TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos
         SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_prod__geral;
 ```
 
-A próxima etapa é buildar o projeto, processo de compilar e montar um programa de computador a partir do código-fonte. Em outras palavras, a *build* é a transformação do código-fonte em um executável ou em um pacote que pode ser implantado em um ambiente de produção.
+A próxima etapa é buildar o projeto do mês de abril: ``dbt_efet_campanhas_incentivo_rede_abr24`` . Processo de compilar e montar um programa de computador a partir do código-fonte. Em outras palavras, a *build* é a transformação do código-fonte em um executável ou em um pacote que pode ser implantado em um ambiente de produção.
 
 É necessário certificar que estamos logado na nuvem para fazer qualquer tipo de alteração. Caso queira confirmar execute o código ``aws sso login``.Um pop-up será exibido, e nele, clique o botão *Abrir*.
 
@@ -372,16 +372,51 @@ O sistema irá abrir um navegador da *AWS*, autorize a conexão pelo app *Authen
 
 <img width="329" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/e14052ca-0c29-4cbe-abb6-8fc0f32b4f79">
 
+Retorne ao *VS Code*, no terminal, entre na pasta do projeto de abril, digitando o seguinte comando:
 
+``cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24``
 
+Na sequência, digite o código:
 
+``.\build_push_dev.sh``
 
+O sistema irá gerar um novo executável após as configurações feitas: migrar o projeto para o esquema ``CAMP_INCENTIVO__REDE_APURAC``. Faremos o mesmo processo para o novo projeto do mês de maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
 
+No terminal, retorne ao diretorio ``home`` e, em seguida, entre na pasta do projeto de maio, digitando o seguinte comando:
 
+```
+cd 
+```
 
+```
+cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_mai24``
+```
 
+```
+.\build_push_dev.sh
+```
 
+Ao finalizar o processamento da ``build``, vamos salvar as alterações no *Airflow*. 
 
+Vamos abrir o arquivo python equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
+
+Neste arquivo, no parâmetro ``docs``, iremos passar o valor da mesma mensagem que vamos informar ao comitar o projeto no *Airflow*: 
+
+``DAG para DBT das campanhas abril e maio 2024``.
+
+<img width="248" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/90c1b6b8-dd24-4d51-9dc5-76a9505144e0">
+
+Utilize o atalho ``Ctrl + Shift + G`` para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações: ``dag campanha abril e maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+
+<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
+
+Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
+
+Agora vamos salvar as alterações no repositório DevOps ``MB.AWS.BIZ.GED``. No box do repositório,  digite uma mensagem relevante para salvar as alterações: ``campanha de maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+
+O sistema irá solicitar o usuário (matrícula) e a senha, informe-os, respectivamente, e dê o ``Enter``.
+
+Em uma nova guia do *VS Code*, vamos retornar ao projeto ``dbt_efet_campanhas_incentivo_rede_abr24``.
 
 
 
