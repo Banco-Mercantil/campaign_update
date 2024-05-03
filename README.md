@@ -236,7 +236,87 @@ Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
 
 <img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
 
-Nesta fase do projeto, para garantir que os dados referentes ao mês de abril não sejam exibidos e armazenados duplicados na base *histórico* é necessário que realizamos uma limpeza nas tabelas, eliminando os resíduos do mês de abril, restando apenas os dados do mês da campanha vigente, maio.
+Agora que a atualização da campanha de março foi paralizada. Vamos navegar pelo repositório devops ``MB.AWS.BIZ.GED`` para o arquivo ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Aqui, nós iremos renomear o arquivo referente ao mês que teve sua atualização no Airflow paralizada, no caso, março, para o mês da campanha que se inicia, maio.
+
+Nome anterior: ``dbt_efet_campanhas_incentivo_rede_mar24``
+
+Nome atualizado: ``dbt_efet_campanhas_incentivo_rede_mai24``
+
+Feito isso, iremos excluir a pasta ``models`` de dentro do projeto que acabamos de renomear. Através do *Explorador de Arquivos* da nossa máquina, iremos até o projeto *DBT* o qual trabalhos as etapas anteriores, copiar a pasta ``models`` de lá, retornar ao *VS Code* com a conexão remota *SSH* e colar no projeto a pasta novamente.
+
+A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+<img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
+
+Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+Já no arquivo ``profiles.yml``, iremos alterar o perfil para referenciar maio, ``dbt_efet_campanhas_incentivo_rede_mai24``, e o *esquema* será atualizado com o valor ``CAMP_INCENTIVO_REDE_VIGENTE``.
+
+<img width="573" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/3da5d00a-5e56-49c2-a46d-895bd98ed960">
+
+Abra este mesmo arquivo ``profiles.yml``, porém, do projeto ``dbt_efet_campanhas_incentivo_rede_abr24``, o qual esta entrando em apuração, e atualize o parâmetro *esquema* para ``CAMP_INCENTIVO_REDE_APURAC``.
+
+<img width="311" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/841adcd6-9cb8-48c8-9321-287657707bde">
+
+Agora salve o arquivo com o atalho ``Ctrl + s ``.
+
+Feito isso, vamos abrir o arquivo python, novamente, equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
+
+Aqui iremos reverter o processo que já fizemos, comentando a última linha de código ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim`` do arquivo e descomentando o seguinte trecho de código para, na sequência, alterarmos as referências de março para maio.
+
+Trecho anterior:
+
+```
+task_dbt_campanha_mar24 = KubernetesPodOperator(
+  task_id="dbt_efet_campanhas_incentivo_rede_mar24",
+  name="dbt_efet_campanhas_incentivo_rede_mar24",
+  image="841714811245.dkr.ecr.us-east-2.amazonaws.com/dbt_efet_campanhas_incentivo_rede_mar24:v1",
+  namespace="processing",        
+  is_delete_operator_pod=True,
+  #node_selector={"app": "airflow"},
+  image_pull_policy="Always",
+  #do_xcom_push=True,
+  in_cluster=True
+)
+```
+
+```
+  inicio >> task_dbt_campanha_abr24
+  inicio >> task_dbt_campanha_mar24
+  
+  task_dbt_campanha_abr24 >> task_dbt_campanha_hist 
+  task_dbt_campanha_mar24 >> task_dbt_campanha_hist 
+  
+  task_dbt_campanha_hist >> fim
+```
+
+Trecho atualizado:
+
+```
+task_dbt_campanha_mai24 = KubernetesPodOperator(
+  task_id="dbt_efet_campanhas_incentivo_rede_mai24",
+  name="dbt_efet_campanhas_incentivo_rede_mai24",
+  image="841714811245.dkr.ecr.us-east-2.amazonaws.com/dbt_efet_campanhas_incentivo_rede_mai24:v1",
+  namespace="processing",        
+  is_delete_operator_pod=True,
+  #node_selector={"app": "airflow"},
+  image_pull_policy="Always",
+  #do_xcom_push=True,
+  in_cluster=True
+)
+```
+
+```
+  inicio >> task_dbt_campanha_abr24
+  inicio >> task_dbt_campanha_mai24
+  
+  task_dbt_campanha_abr24 >> task_dbt_campanha_hist 
+  task_dbt_campanha_mai24 >> task_dbt_campanha_hist 
+  
+  task_dbt_campanha_hist >> fim
+```
+
+Nesta fase do projeto, para garantir que os dados referentes ao mês de abril não sejam exibidos e armazenados duplicados na base *histórico* é necessário que realizamos uma limpeza nas tabelas incrementais, eliminando os resíduos do mês de abril, restando apenas os dados do mês da campanha vigente, maio.
 
 Para isso, utilizaremos a seguintes instruções SQL no *Snowflake*, disponíveis no arquivo: ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\EXECUTAR_MIG_SCHEMAS_CAMPANHA.txt``:
 
@@ -282,39 +362,15 @@ TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos
         SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_prod__geral;
 ```
 
-Agora que a atualização da campanha de março foi paralizada. Vamos navegar pelo repositório devops ``MB.AWS.BIZ.GED`` para o arquivo ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Aqui, nós iremos renomear o arquivo referente ao mês que teve sua atualização no Airflow paralizada, no caso, março, para o mês da campanha que se inicia, maio.
+A próxima etapa é buildar o projeto, processo de compilar e montar um programa de computador a partir do código-fonte. Em outras palavras, a *build* é a transformação do código-fonte em um executável ou em um pacote que pode ser implantado em um ambiente de produção.
 
-Nome anterior: ``dbt_efet_campanhas_incentivo_rede_mar24``
+É necessário certificar que estamos logado na nuvem para fazer qualquer tipo de alteração. Caso queira confirmar execute o código ``aws sso login``.Um pop-up será exibido, e nele, clique o botão *Abrir*.
 
-Nome atualizado: ``dbt_efet_campanhas_incentivo_rede_mai24``
+<img width="292" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/bad2ea14-77a8-422d-8a16-b6402388a3b6">
 
-Feito isso, iremos excluir a pasta ``models`` de dentro do projeto que acabamos de renomear. Através do *Explorador de Arquivos* da nossa máquina, iremos até o projeto *DBT* o qual trabalhos as etapas anteriores, copiar a pasta ``models`` de lá, retornar ao *VS Code* com a conexão remota *SSH* e colar no projeto a pasta novamente.
+O sistema irá abrir um navegador da *AWS*, autorize a conexão pelo app *Authenticator*, cliquei no botão *Confirm and continue* para seguir. Na sequência clique em *Allow access*, ao final você deverá receber esta mensagem:
 
-A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
-
-<img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
-
-Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
-
-Já no arquivo ``profiles.yml``, iremos alterar o perfil para referenciar maio, ``dbt_efet_campanhas_incentivo_rede_mai24``, e o *esquema* será atualizado com o valor ``CAMP_INCENTIVO_REDE_VIGENTE``.
-
-<img width="573" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/3da5d00a-5e56-49c2-a46d-895bd98ed960">
-
-Abra este mesmo arquivo ``profiles.yml``, porém, do projeto ``dbt_efet_campanhas_incentivo_rede_abr24``, o qual esta entrando em apuração, e atualize o parâmetro *esquema* para ``CAMP_INCENTIVO_REDE_APURAC``.
-
-<img width="311" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/841adcd6-9cb8-48c8-9321-287657707bde">
-
-
-
-
-
-
-
-
-
-
-
-
+<img width="329" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/e14052ca-0c29-4cbe-abb6-8fc0f32b4f79">
 
 
 
