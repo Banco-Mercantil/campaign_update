@@ -416,7 +416,25 @@ Agora vamos salvar as alterações no repositório DevOps ``MB.AWS.BIZ.GED``. No
 
 O sistema irá solicitar o usuário (matrícula) e a senha, informe-os, respectivamente, e dê o ``Enter``.
 
-Em uma nova guia do *VS Code*, vamos retornar ao projeto ``dbt_efet_campanhas_incentivo_rede_abr24``.
+Em uma nova guia do *VS Code*, vamos retornar ao projeto ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24``. Uma vez no projeto, execute o comando no terminal:
+
+``dbt run -s int_dpz__metas``
+
+Exclua a pasta ``target`` do projeto e execute o comando:
+
+``dbt run -s int_dpz__metas --full-refresh``
+
+Note que a pasta ``target`` foi criada novamente. Então execute o comando ``dbt debug`` para testar as conexões.
+
+Abra o arquivo ``profiles.yml`` e altere o *squema* para ``CAMP_INCENTIVO__REDE_APURAC`` e execute o comando ``dbt run -s int_dpz__metas --full-refresh``, novamente.
+
+Neste momento, confira os dados através da observação dos BI's, abra uma guia no link do dashboard antes de atualizar as fontes de dados e uma outra após atualizar. Repare que os valores irão se alterar, porém, a divergência não deverá ser muito discrepante.
+
+
+
+
+
+
 
 
 
