@@ -139,6 +139,14 @@ Portanto, toda referência contida no arquivo ``dbt_project.yml`` ao projeto de 
 
 Feito as alterações no projeto ``dbt_efet_campanhas_incentivo_rede_mai24``, salve-o com o atalho ``Ctrl + s ``.
 
+### Configurando o arquivo build_push_dev.sh e Dockerfile.txt:
+
+A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+<img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
+
+Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
 Nesta etapa, exclua a pasta ``target`` do projeto. Ela será gerada novamente com os parâmetros corretos, assim que executar o projeto.
 
 ## Executando o nosso modelo:
