@@ -35,9 +35,19 @@ O presente projeto foi instruido pelo seguinte vídeo de apoio:
 
 ## 🚀 Inicializando o projeto:
 
-### Paralisação da campanha atual:
+### 1.0 Paralisação da campanha atual:
 
 Inicialmente, para que possamos ajustar os devidos paramêtros e realizar a virada de campanha, a primeira ação a ser cumprida envolve paralisar a atualização dos pacotes de campanha que estão ativos a fim de que não haja nenhum tipo de competição entre o arquivo atual e o novo arquivo que iremos migrar.
+
+Para tal, acesse o site do *[Airflow](https://airflow.real-dev.n-mercantil.com.br/home)* com seu login e senha. Ao entrar, você verá todas as *DAGs* disponíveis do banco. Esta, por sua vez, é uma coleção de tarefas organizadas que você quer programar e executar a qualquer instante.
+
+Com o site aberto, localize a DAG no qual você estará fazendo a atualização do projeto e clique em seu nome. Você será redirecionado para uma nova tela e nela basta pausar a atualização agendada conforme a imagem abaixo:
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/9eebadbe-8205-41bb-8308-ee214eb7293b)
+
+Feito isso. Podemos dar sequencia na atualização da campanha.
+
+
 
 
 
