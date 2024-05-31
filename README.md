@@ -35,7 +35,10 @@ O presente projeto foi instruido pelo seguinte vídeo de apoio:
 
 ## 🚀 Inicializando o projeto:
 
+### Paralisação da campanha atual:
+
 Inicialmente, para que possamos ajustar os devidos paramêtros e realizar a virada de campanha, a primeira ação a ser cumprida envolve paralisar a atualização dos pacotes de campanha que estão ativos a fim de que não haja nenhum tipo de competição entre o arquivo atual e o novo arquivo que iremos migrar.
+
 
 
 
