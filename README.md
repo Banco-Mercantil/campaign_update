@@ -31,8 +31,13 @@ O presente projeto foi instruido pelo seguinte vídeo de apoio:
 
 - [Vídeo de apoio - Parte 1](https://drive.google.com/file/d/1yXN4XdE1xfPpvXiAhqj_w6fHLLhqmqSN/view?usp=sharing)
 - [Vídeo de apoio - Parte 2](https://drive.google.com/file/d/1BW0A9dx1G62odT5OPcNRbzcugwunsO4H/view?usp=sharing)
+- [Vídeo de apoio - Parte 3](https://drive.google.com/file/d/1fZph-kaNqGy_byzNBVSvxC7VXrf7r0yk/view?usp=sharing)
 
 ## 🚀 Inicializando o projeto:
+
+Inicialmente, para que possamos ajustar os devidos paramêtros e realizar a virada de campanha, a primeira ação a ser cumprida envolve paralisar a atualização dos pacotes de campanha que estão ativos a fim de que não haja nenhum tipo de competição entre o arquivo atual e o novo arquivo que iremos migrar.
+
+
 
 Após todos os acessos liberados e as ferramentas necessárias instaladas, navegue no explorador de arquivos de sua máquina até a pasta: ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede``. Para simplificar a criação de um novo projeto *DBT*, iremos clonar o projeto mais atual desta pasta e gerar uma cópia deste arquivo neste mesmo diretório.
 
