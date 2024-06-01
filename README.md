@@ -41,11 +41,11 @@ Inicialmente, para que possamos ajustar os devidos paramêtros e realizar a vira
 
 Para tal, acesse o site do *[Airflow](https://airflow.real-dev.n-mercantil.com.br/home)* com seu login e senha. Ao entrar, você verá todas as *DAGs* disponíveis do banco. Esta, por sua vez, é uma coleção de tarefas organizadas que você quer programar e executar a qualquer instante.
 
-Com o site aberto, localize a DAG na qual você estará fazendo a atualização do projeto e clique em seu nome. Você será redirecionado para uma nova tela e nela basta pausar a atualização agendada, conforme a imagem abaixo:
+Com o site aberto, localize a *DAG* na qual você estará fazendo a atualização do projeto e clique em seu nome. Você será redirecionado para uma nova tela e nela basta pausar a atualização agendada, conforme a imagem abaixo:
 
 ![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/9eebadbe-8205-41bb-8308-ee214eb7293b)
 
-Feito isso. Podemos dar sequencia na atualização da campanha.
+Feito isso. Podemos dar sequência na atualização da campanha.
 
 ### 2.0 Atualização nos paramêtros do código DBT:
 
@@ -73,7 +73,7 @@ Uma nova IDE do *Visual Studio Code* será aberta no projeto desejado ``dbt_efet
 ![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/866130d0-20cb-4f17-a672-c7f21c36089a)
 
 Na etapa seguinte, iremos alterar alguns paramêtros de configuração para ajustar o arquivo ao periodo do mês vigente, neste caso, maio.\
-Na ramificação de arquivos, a pasta ``parametros`` é composta por alguns arquivos ``.sql ``. No arquivo denominado ``periodos_camp.sql`` é definido duas variaveis para marcar o início e o fim de cada campanha. Essas variáveis deverão ser atualizadas com a data de inicio e fim do mês vigente, ou seja, o período que compreende a nova campanha que se inicia.
+Na ramificação de arquivos, a pasta ``parametros`` é composta por alguns arquivos ``.sql ``. No arquivo denominado ``periodos_camp.sql`` é definido duas variáveis para marcar o início e o fim de cada campanha. Essas variáveis deverão ser atualizadas com a data de início e fim do mês vigente, ou seja, o período que compreende a nova campanha que se inicia.
 
 Paramêtros de abril:
 
@@ -111,7 +111,7 @@ Feito as alterações no arquivo ``periodos_camp.sql``, salve-o com o atalho ``C
 
 ### 2.1 Configurando a Conexão com o Banco de Dados:
 
-Ainda com o nosso projeto aberto na IDE *VS Code*, na raiz do projeto *DBT*, abra o arquivo denomominado: ``profiles.yml``. Este arquivo permite selecionar credenciais exclusivas de suas fontes e destinos de dados, aqui são descritos os perfis de banco de dados que serão conectados. 
+Ainda com o nosso projeto aberto na IDE *VS Code*, na raiz do projeto *DBT*, abra o arquivo denomominado: ``profiles.yml``. Este arquivo permite selecionar credenciais exclusivas de suas fontes e destinos de dados. Aqui são descritos os perfis de banco de dados que serão conectados. 
 
 Neste documento, iremos atualizar o nome do perfil que o DBT deverá usar no projeto para: ``dbt_efet_campanhas_incentivo_rede_mai24:``.
 
@@ -160,11 +160,67 @@ A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos sub
 
 <img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
 
-Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+Nos arquivo ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+
+### 2.4 Ajustando a pasta target:
 
 Nesta etapa, exclua a pasta ``target`` do projeto. Ela será gerada novamente com os parâmetros corretos, assim que executar o projeto.
 
-### 3.0 Executando o nosso modelo:
+### 3.0 Atualização de query:
+
+Caso haja mudanças nas regras da campanha, será necessário realizar alguma alteração no código fonte do projeto. Esta etapa poderá ser implementada neste momento.
+
+### 3.1 Atualização de tabelas no Snowflake:
+
+Nesta fase, caso tenha sido criadas novas colunas nos arquivos `.sql`, e caso estes arquivos forem materializados como tabelas ou views, será necessário realizar os devidos ajustes de estrutura nas tabelas no *Snowflake*. Aqui há duas possíveis abordagens, a primeira, é executar o comando `ALTER TABLE`, a segunda, é realizar o `DROP TABLE`, assim ao executar o projeto, esta tabela será materializada novamente já com a nova arquitetura de colunas. 
+
+Vale ressaltar que esta última abordagem só é válida, visto que, até o presente momento, estamos executando tudo no **ambiente de desenvolvimento**, ou seja, no esquema `CAMP_INCENTIVO_DEV`. Para o **ambiente de produção** será necessário seguir com o comando `ALTER TABLE`.
+
+No exemplo a seguir, foram realizados a inserção de duas novas colunas: `producao_efetivada_crt_consignado`, `producao_desconsiderada_crt_consignado`, `producao_crt_consignado`, `meta_crt_consignado`, `rlz_crt_consignado` e `rlz_elegibilidade_app_mb`, na tabela `mrt_apuracao__individual` do ambiente de desenvolvimento inicialmente, `camp_incentivo_dev`, e posteriormente nos ambientes de produção, `camp_incentivo__rede_vigente`, `camp_incentivo__rede_apurac` e `camp_incentivo__rede_historico`.
+
+```
+--mrt_apuracao__individual
+
+    --camp_incentivo_dev
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN producao_efetivada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN producao_desconsiderada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN producao_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN meta_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN rlz_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual ADD COLUMN rlz_elegibilidade_app_mb NUMBER(10,2);
+SELECT rlz_elegibilidade_app_mb FROM sdx_excelencia_comercial.camp_incentivo_dev.mrt_apuracao__individual;
+    --camp_incentivo__rede_vigente
+    
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN producao_efetivada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN producao_desconsiderada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN producao_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN meta_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN rlz_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual ADD COLUMN rlz_elegibilidade_app_mb NUMBER(10,2);
+SELECT rlz_elegibilidade_app_mb FROM sdx_excelencia_comercial.camp_incentivo__rede_vigente.mrt_apuracao__individual;
+
+    --camp_incentivo__rede_apurac
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN producao_efetivada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN producao_desconsiderada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN producao_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN meta_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN rlz_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual ADD COLUMN rlz_elegibilidade_app_mb NUMBER(10,2);
+SELECT rlz_elegibilidade_app_mb FROM sdx_excelencia_comercial.camp_incentivo__rede_apurac.mrt_apuracao__individual;
+
+    --camp_incentivo__rede_historico
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN producao_efetivada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN producao_desconsiderada_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN producao_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN meta_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN rlz_crt_consignado NUMBER(10,2);
+ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual ADD COLUMN rlz_elegibilidade_app_mb NUMBER(10,2);
+SELECT rlz_elegibilidade_app_mb FROM sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual;
+```
+
+Feito as devidas correções na estrutura da tabela dos ambientes de desenvolvimento e de produção, é possível seguir com a execução do projeto, a priore, no ambiente de teste.
+
+### 4.0 Executando o nosso modelo:
 
 Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de dados e exibir informações para fins de depuração. Ao final da execução, uma mensagem de sucesso deverá ser exibida.
 
@@ -173,19 +229,10 @@ Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de
 Verificado as conexões, execute o comando ``dbt run`` para criar o modelo baseado nos arquivos anteriores.\
 O comando acima irá executar o projeto como um todo, ou seja, irá rodar todos os pacotes novamente. Porém, caso deseje executar apenas os arquivos que tiveram alteração ou que foram criados nesta nova campanha, é possível executar o comando: ``dbt run -s nome_do_arquivo --full-refresh``. Dessa forma, apenas o arquivo indicado será executado e não todo o pacote.
 
+### 5.0 Upload do novo projeto para a AWS:
 
-### 3.0 Atualização de tabelas no Snowflake:
+### 5.1 Conexão na AWS através do protocolo SSH:
 
-
-
-
-
-
-
-
-### 4.0 Upload do novo projeto para a AWS:
-
-### 4.1 Conexão na AWS através do protocolo SSH:
 Para migrar o projeto *DBT* da máquina para a *AWS* é necessário conectarmos remotamente na nuvem, através do protocolo *SSH*. Logo, no *VS Code*, no canto inferior esquerdo, há um ícone com duas setas de maior e menor que (><), selecione este para abrir uma janela remota. Um pop-up irá aparecer, você deverá selecionar a opção *Conectar-se ao Host...*.
 
 <img width="590" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/343d20b6-9ede-456d-b190-11eaad28f104">
@@ -210,11 +257,11 @@ Automaticamente o diretório do seu usuário será preenchido na barra de pesqui
 
 <img width="755" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/d3edb92f-9e33-4032-8e8d-8205890712b7">
 
-O sistema, novamente, irá se solicitar a senha, informe-a e na sequência dê o ``Enter``. Feito isso, sua *IDE* deverá se parecer com a imagem abaixo:
+O sistema, novamente, irá solicitar a senha, informe-a e na sequência dê o ``Enter``. Feito isso, sua *IDE* deverá se parecer com a imagem abaixo:
 
 <img width="960" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/34f59ccc-3967-4a2b-8418-0c475fbc7998">
 
-Conectato remotamente a nuvem através do protocolo *SSH*, é necessário logar a *AWS* para fazer qualquer alteração no *DevOps*, ou seja, no diretório da máquina virtual na nuvem. Nesta fase, digite, então, a linha de comando ``aws sso login``. Um pop-up será exibido, e nele, clique o botão *Abrir*.
+Conectato remotamente a nuvem através do protocolo *SSH*, é necessário logar a *AWS* para fazer qualquer alteração no *DevOps*, ou seja, no diretório da máquina virtual na nuvem. Nesta fase, digite, então, a linha de comando ``aws sso login`` no terminal. Um pop-up será exibido, e nele, clique o botão *Abrir*.
 
 <img width="292" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/bad2ea14-77a8-422d-8a16-b6402388a3b6">
 
@@ -222,91 +269,103 @@ Nesta etapa, o sistema irá abrir um navegador da *AWS*, autorize a conexão pel
 
 <img width="329" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/e14052ca-0c29-4cbe-abb6-8fc0f32b4f79">
 
-### 4.2 Atualização de diretório da VM:
+### 5.2 Atualização de diretório da VM:
 
-Você poderá fechar o navegador neste momento e retornar ao *VS Code*. Após logado, o primeiro passo a ser feito é executar o comando ``pull`` para que os arquivos e configurações que constam no repositório sejam carregados para a sua máquina. 
+Você poderá fechar o navegador neste momento e retornar ao *VS Code*. Após logado, o primeiro passo a ser feito é executar o comando ``pull`` para que os arquivos e configurações que constam no repositório da VM sejam carregados para a sua máquina. 
 
 Utilize o atalho ``Ctrl + Shift + G`` para acessar a guia de controle do código-fonte. Clique nos *três pontinhos* e selecione a opção *Efetuar Pull*. 
 
+Faça esse procedimento tanto para atualizar o diretório da VM, `MBAWS.BIZ.GEC`, quanto o repositório do *Airflow*, `airflow-repository-is8vtfi0...`.
+
+Ao executar o comando no diretório da VM, o sistema, novamente, irá solicitar o usuário, ou seja, sua matrícula, e a senha. Informe-a e na sequência dê o ``Enter``.
+
 <img width="685" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/fd8a5e2e-3369-414c-bd63-6beeb5b86d7c">
 
-### 4.3 Agendamento de DAG no Airflow:
+### 5.3 Configuração do projeto em apuração:
 
-Feito isso, vamos abrir o arquivo python equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
+Neste momento é necessário configurar o projeto *DBT* ``dbt_efet_campanhas_incentivo_rede_abr24``, que se encontra no **esquema vigente**, para o **esquema apurac**, visto que a produção equivalente ao mês de abril será apurada para bonificação dos colaboradores e a produção que entrará em vigor contabilizará para o mês de maio, logo este deverá ser configurado posteriormente para o **esquema vigente**.
 
-<img width="306" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/6e3580c1-596c-4de8-b376-b5fd00e7a6b1">
+Para isso, vamos navegar pelo repositório *DevOps* ``MB.AWS.BIZ.GED`` para o arquivo ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Feito isso acesse o projeto referente ao mês que entrará em apuração, neste caso, o projeto ``dbt_efet_campanhas_incentivo_rede_abr24``.
 
-Aqui iremos gerenciar quais *DAGs* iremos manter a atualização recorrente por meio do agendamento. Neste arquivo iremos parar a atualização da campanha de março e manter a de abril. Ao final do arquivo iremos comentar o seguinte trecho de cógido:
+Abra o arquivo ``profiles.yml``, do projeto e atualize o parâmetro *esquema* para ``CAMP_INCENTIVO_REDE_APURAC``. Agora salve o arquivo com o atalho ``Ctrl + s ``.
 
-```
-task_dbt_campanha_mar24 = KubernetesPodOperator(
-  task_id="dbt_efet_campanhas_incentivo_rede_mar24",
-  name="dbt_efet_campanhas_incentivo_rede_mar24",
-  image="841714811245.dkr.ecr.us-east-2.amazonaws.com/dbt_efet_campanhas_incentivo_rede_mar24:v1",
-  namespace="processing",        
-  is_delete_operator_pod=True,
-  #node_selector={"app": "airflow"},
-  image_pull_policy="Always",
-  #do_xcom_push=True,
-  in_cluster=True
-)
-```
+<img width="311" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/841adcd6-9cb8-48c8-9321-287657707bde">
 
-```
-  inicio >> task_dbt_campanha_abr24
-  inicio >> task_dbt_campanha_mar24
-  
-  task_dbt_campanha_abr24 >> task_dbt_campanha_hist 
-  task_dbt_campanha_mar24 >> task_dbt_campanha_hist 
-  
-  task_dbt_campanha_hist >> fim
-```
+### 5.4 Configuração do projeto em vigencia:
 
-Já a linha de código, ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim``, que está comentada iremos descomentar, deixando o arquivo desta forma:
-
-<img width="675" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/52cacfca-ee32-4d28-bb72-212e345f161b">
-
-### 4.4 Salvar alterações de agendamento do Airflow:
-
-Feito as alterações no projeto, iremos executar o comando ``Commit`` para salvar as modificações no *Airflow*. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
-
-<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
-
-Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
-
-<img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
-
-
-
-
-
-Agora que a atualização da campanha de março foi paralizada. Vamos navegar pelo repositório *DevOps* ``MB.AWS.BIZ.GED`` para o arquivo ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Aqui, nós iremos renomear o arquivo referente ao mês que teve sua atualização no *Airflow* paralizada, no caso, março, para o mês da campanha que se inicia, maio.
+Vamos navegar pelo repositório *DevOps* ``MB.AWS.BIZ.GED`` novamente, porém, agora para o caminho ``MB.AWS.BIZ.GED\1_Campanhas\Rede``. Aqui, nós iremos renomear o arquivo referente ao projeto que, no momento da alteração, consta no **esquema apurac**. Para o nosso exemplo aqui, este projeto é o ``dbt_efet_campanhas_incentivo_rede_mar24``. Este será renomeado com o nome do projeto que se inicia: ``dbt_efet_campanhas_incentivo_rede_mai24``.
 
 Nome anterior: ``dbt_efet_campanhas_incentivo_rede_mar24``
 
 Nome atualizado: ``dbt_efet_campanhas_incentivo_rede_mai24``
 
-Feito isso, iremos excluir a pasta ``models`` de dentro do projeto que acabamos de renomear. Através do *Explorador de Arquivos* da nossa máquina, iremos até o projeto *DBT* o qual trabalhos as etapas anteriores, copiar a pasta ``models`` de lá, retornar ao *VS Code* com a conexão remota *SSH* e colar no projeto a pasta novamente.
+Feito isso, iremos excluir a pasta ``models`` de dentro do projeto que acabamos de renomear. Através do *Explorador de Arquivos* da nossa máquina local, iremos até o projeto *DBT*, o qual foi trabalhado nas etapas anteriores, copiar a pasta ``models`` de lá, retornar ao *VS Code* com a conexão remota *SSH* e colar no projeto renomeado a pasta novamente ``models`` do projeto *DBT* local.
 
-A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+Em outras palavras, iremos copiar a pasta  ``models`` do projeto *DBT* ``dbt_efet_campanhas_incentivo_rede_mai24``, que se encontra no caminho ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\``, e colar no projeto *DBT* ``dbt_efet_campanhas_incentivo_rede_mai24`` que se encontra no caminho ``MB.AWS.BIZ.GED\1_Campanhas\Rede``.
+
+A próxima alteração será no arquivo ``build_push_dev.sh``. Neste, iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mar24`` -> ``dbt_efet_campanhas_incentivo_rede_mai24``.
 
 <img width="597" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee8a2e40-adf5-4166-ad2a-620c7bd6a705">
 
-Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
+Nos arquivos ``dbt_project.yml`` e ``Dockerfile``, também iremos substituir os parâmetros que referenciam a campanha de março para maio: ``dbt_efet_campanhas_incentivo_rede_mar24`` -> ``dbt_efet_campanhas_incentivo_rede_mai24``.
 
 Já no arquivo ``profiles.yml``, iremos alterar o perfil para referenciar maio, ``dbt_efet_campanhas_incentivo_rede_mai24``, e o *esquema* será atualizado com o valor ``CAMP_INCENTIVO_REDE_VIGENTE``.
 
 <img width="573" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/3da5d00a-5e56-49c2-a46d-895bd98ed960">
 
-Abra este mesmo arquivo ``profiles.yml``, porém, do projeto ``dbt_efet_campanhas_incentivo_rede_abr24``, o qual esta entrando em apuração, e atualize o parâmetro *esquema* para ``CAMP_INCENTIVO_REDE_APURAC``.
+### 5.5 Gerar arquivo executável:
 
-<img width="311" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/841adcd6-9cb8-48c8-9321-287657707bde">
+Feita tais configurações nos arquivos, é necessário agora *buildar* os projetos ajustados, ou seja, tanto o projeto em apuração ``dbt_efet_campanhas_incentivo_rede_abr24``, quanto o projeto vigente ``dbt_efet_campanhas_incentivo_rede_mai24``. 
 
-Agora salve o arquivo com o atalho ``Ctrl + s ``.
+Este processo envolve compilar e montar um programa de computador a partir dos novos códigos-fontes. Em outras palavras, a *build* é a transformação do código-fonte em um executável ou em um pacote que pode ser implantado em um ambiente de produção.
 
-Feito isso, vamos abrir o arquivo python, novamente, equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
+É necessário certificarmos que estamos logado na nuvem da *AWS* para fazer qualquer tipo de alteração.
 
-Aqui iremos reverter o processo que já fizemos, comentando a última linha de código ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim`` do arquivo e descomentando o seguinte trecho de código para, na sequência, alterarmos as referências de março para maio.
+Gerar um arquivo executável exige que entremos na pasta do projeto através do terminal no *VS Code*. O primeiro executável a ser criado será referente ao projeto em apuração, ``dbt_efet_campanhas_incentivo_rede_abr24``. Entre em sua pasta digitando o seguinte comando: 
+
+```
+cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24
+```
+
+Na sequência, digite o comando a seguir, para transformar o código-fonte em um executável:
+
+```
+.\build_push_dev.sh
+```
+
+O segundo executável a ser criado será referente ao projeto em vigencia, ``dbt_efet_campanhas_incentivo_rede_mai24``. Acesse sua pasta digitando o seguinte comando: 
+
+```
+cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_mai24
+```
+
+Na sequência, digite o comando a seguir, para transformar o código-fonte em um executável:
+
+```
+.\build_push_dev.sh
+```
+
+Pronto! Agora tem-se dois códigos-fontes transformados em um executável na nuvem.
+
+### 5.6 Configuração do agendamento de DAGs do Airflow: março para maio
+
+A próxima etapa requer paralisar a atualização do projeto *DBT* de março e iniciar a atulização do projeto de maio, o qual está em vigencia. 
+
+Ao final deste processo, o projeto *DBT* de abril e maio deverão ter atualizações recorrentes, enquanto o projeto de março manterá seus dados estáticos. Isso para que não se perca ou se altere valores de apuração, produção e bonificação dos colaboradores participantes da campanha de março.
+
+Vamos, então, abrir o arquivo python referente a *DAG* na qual os projetos configurados são atualizados, neste caso, o arquivo ``main_dbt_camp_incentivo_rede.py`` contido na pasta ``gec_airflow``.
+
+<img width="306" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/6e3580c1-596c-4de8-b376-b5fd00e7a6b1">
+
+Aqui iremos gerenciar quais *DAGs* iremos manter a atualização recorrente por meio do agendamento. A primeira mudança ocorrerá no paramêtro ``docs``. Este irá receber em seu valor a referencia das camapanhas nas quais ele trata, neste caso, a campanha do mês de abril e maio. Logo seu valor ficará:
+
+```
+docs = """
+# DAG para DBT das campanhas abril e maio 2024
+"""
+```
+
+A segunda mudança será alterar as referências que o código faz à campanha de março para maio.
 
 Trecho anterior:
 
@@ -359,6 +418,45 @@ task_dbt_campanha_mai24 = KubernetesPodOperator(
   
   task_dbt_campanha_hist >> fim
 ```
+
+
+<img width="675" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/52cacfca-ee32-4d28-bb72-212e345f161b">
+
+
+
+
+
+
+
+
+
+
+### 6.0 Salvar alterações de agendamento do Airflow:
+
+Feito as alterações no projeto, iremos executar o comando ``Commit`` para salvar as modificações no *Airflow*. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+
+<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
+
+Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
+
+<img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
+
+
+
+
+
+
+
+
+
+
+Feito isso, vamos abrir o arquivo python, novamente, equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
+
+Aqui iremos reverter o processo que já fizemos, comentando a última linha de código ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim`` do arquivo e descomentando o seguinte trecho de código para, na sequência, alterarmos as referências de março para maio.
+
+
+
+### 6.0 Migrar dados do esquema vigente para o esquema apurac:
 
 Nesta fase do projeto, para garantir que os dados referentes ao mês de abril não sejam exibidos e armazenados duplicados na base *histórico* é necessário que realizamos uma limpeza nas tabelas incrementais, eliminando os resíduos do mês de abril, restando apenas os dados do mês da campanha vigente, maio.
 
