@@ -222,6 +222,11 @@ Código completo encontra-se no arquivo ``alter_table.sql`` deste repositório G
 
 Feito as devidas correções na estrutura da tabela dos ambientes de desenvolvimento e de produção, é possível seguir com a execução do projeto, a priore, no ambiente de teste.
 
+> [!NOTE]
+> Vale ressaltar que qualquer alteração de estrutura das tabelas no projeto *DBT* vigente, deve ser replicado para o projeto *DBT* em apuração.\
+> O projeto *DBT* em apuração necessitará de um novo código executável, após as transformações. \
+> Em outras palavras, ambos os projetos *DBTs* deverão passar pelo processo de **build**.
+
 ### 4.0 Executando o nosso modelo:
 
 Execute o comando ``dbt debug``, no terminal, para testar a conexão do banco de dados e exibir informações para fins de depuração. Ao final da execução, uma mensagem de sucesso deverá ser exibida.
@@ -351,11 +356,11 @@ Pronto! Agora tem-se dois códigos-fontes transformados em um executável na nuv
 
 ### 6.0 Agendamento de DAGs do Airflow:
 
-### 6.1 Configuração do agendamento de DAGs do Airflow:
-
 A próxima etapa requer paralisar a atualização do projeto *DBT* de março e iniciar a atulização do projeto de maio, o qual está em vigencia. 
 
 Ao final deste processo, o projeto *DBT* de abril e maio deverão ter atualizações recorrentes, enquanto o projeto de março manterá seus dados estáticos. Isso para que não se perca ou se altere valores de apuração, produção e bonificação dos colaboradores participantes da campanha de março.
+
+### 6.1 Configuração do agendamento de DAGs do Airflow:
 
 Vamos, então, abrir o arquivo python referente a *DAG* na qual os projetos configurados são atualizados, neste caso, o arquivo ``main_dbt_camp_incentivo_rede.py`` contido na pasta ``gec_airflow``.
 
@@ -427,7 +432,7 @@ task_dbt_campanha_mai24 = KubernetesPodOperator(
 
 ### 6.2 Salvar Configurações do agendamento de DAGs do Airflow:
 
-Feito as alterações no arquivo python, iremos executar o comando ``Commit`` para salvar as modificações no ***Airflow***. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do ***Airflow***, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+Feito as alterações no arquivo python, iremos executar o comando ``Commit`` para salvar as modificações no ***Airflow***. Utilize o atalho ``Ctrl + Shift + G``, para acessar a guia de controle do código-fonte. No box do ***Airflow***, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
 
 <img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
 
@@ -445,38 +450,55 @@ Nesta fase do projeto, para garantir que os dados referentes a produção do mê
 
 Visto que os dados produzidos durante o período de março já foram apurados e migrados para as tabelas do *esquema histórico*, os dados das tabelas do *esquema apurac* poderão ser deletados e os dados do mês de abril, que no momento, estão no *esquema vigente* poderão popular agora as tabelas do *esquema apurac*, permitindo assim, que os dados da produção do mês de maio possam ser armazenados sem perdas no *esquema vigente*.
 
-Para isso, vamos acessar o link do *[Snowflake](https://app.snowflake.com/kdumwgr/dda57677/wseLagQNRKh/query)*. Em um worksheet em branco, iremos executar o comando ``TRUNCATE`` no *esquema apurac* e na sequência popular este mesmo esquema com os dados contidos no *esquema vigente* das seguintes tabelas: ``int__participantes_dia_util``, ``int_metas__individuais``, ``int_dpz__metas``, ``int_servicos_meta__geral``, ``int_servicos_prod__geral``. Desta forma limpando os registros de março e transferindo os registros de abril para o esquema apurac.
+Para isso, o primeiro passo, por segurança, será armazenar em um bloco de notas o ***ID*** da última atualização que teve dos dados. Isso deve-se para caso haja algum equivoco e seja necessário restaurar os dados das tabelas.
+
+Acesse o link do *[Snowflake](https://app.snowflake.com/kdumwgr/dda57677/wseLagQNRKh/query)* e faça login pelo usuário nominal. As credenciais deste usuário constam no arquivo ``profiles.yml`` nos paramêtros de ``user`` e ``password``.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/ee1a20a1-0ed8-4d99-9d37-1a24acd39862)
+
+Feito isso, acesse ,no menu lateral, o histórico de execução de query.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/17a37b38-64c2-44b1-92db-ddbd5cc7bf80)
+
+Retorne ao *VS Code* conectado ao *SSH*, no projeto *DBT* ``dbt_efet_campanhas_incentivo_rede_mai24``, acesse o arquivo ``dbt_project.yml``. Ao final do documento, copie o valor do paramêtro ``+query_tag:``.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/1bc90c30-4108-4681-a72f-7867b6a9ca23)
+
+Volte ao *Snowflake*, selecione o filtro e cole o trecho copiado no paramêtro de ``Query Tag``.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/8e22f995-2d58-43e7-ae4f-d1680818ce30)
+
+Após filtrar, copie o ``Query ID`` da última execução que ocorreu no *esquema vigente*, do tipo *Create or Replace*, e cole em algum bloco de notas. Caso seja necessário executar um **rollback**, as tabelas deverão retornar a execução deste identificador.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/b3bc5c76-9038-4fec-ab79-97cb41e1fb88)
+
+A etapa seguinte é a execução do processo de transferência de fato. Em um worksheet em branco, iremos executar o comando ``TRUNCATE`` no *esquema apurac* e na sequência popular este mesmo esquema com os dados contidos no *esquema vigente* das seguintes tabelas: ``int__participantes_dia_util``, ``int_metas__individuais``, ``int_dpz__metas``, ``int_servicos_meta__geral``, ``int_servicos_prod__geral``. Desta forma limpando os registros de março e transferindo os registros de abril para o esquema apurac.
 
 A título de conferência, a mesma quantidade de linhas existentes nas tabelas do *esquema vigente* agora devem ser idênticos a quantidade de linhas do *esquema apurac*. Execute um ``SELECT COUNT(*) FROM`` em cada esquema para validação.
 
 O **código completo** deste processo, encontra-se no arquivo ``esquema_apuracao.sql`` neste repositório do Git.
 
+### 8.0 Teste de execução:
+
+A próxima etapa valida se todas as alterações feitas estão de acordo com o esperado. Para tal, retornaremos para a *DAG* ``dbt-campanha_incentivo_rede`` no *[Airflow](https://airflow.real-dev.n-mercantil.com.br/home)*. Uma vez dentro dela, iremos forçar manualmente uma atualização.
+
+A direita da tela, clique no ícone de *play* e na sequência selecione ``Trigger DAG``. Essa ação irá rodar os projetos da *DAG* e popular as devidas tabelas no *Snowflake*.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/f4f75272-facd-4819-a9d1-7ef94e7c74dc)
+
+### 9.0 Salvar alterações no repositório DevOps:
+
+Agora vamos salvar as alterações no repositório DevOps ``MB.AWS.BIZ.GED``. Utilize o atalho ``Ctrl + Shift + G``, para acessar a guia de controle do código-fonte. No box do repositório,  digite uma mensagem relevante para salvar as alterações: ``campanha de maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+
+<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
+
+Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
+
+<img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
+
+### 10.0 Limpar esquema vigente:
 
 
-
-
-
-
-
-
-### 8.0 Salvar alterações:
-Agora vamos salvar as alterações no repositório DevOps ``MB.AWS.BIZ.GED``. No box do repositório,  digite uma mensagem relevante para salvar as alterações: ``campanha de maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
-
-O sistema irá solicitar o usuário (matrícula) e a senha, informe-os, respectivamente, e dê o ``Enter``.
-
-Em uma nova guia do *VS Code*, vamos retornar ao projeto ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24``. Uma vez no projeto, execute o comando no terminal:
-
-``dbt run -s int_dpz__metas``
-
-Exclua a pasta ``target`` do projeto e execute o comando:
-
-``dbt run -s int_dpz__metas --full-refresh``
-
-Note que a pasta ``target`` foi criada novamente. Então execute o comando ``dbt debug`` para testar as conexões.
-
-Abra o arquivo ``profiles.yml`` e altere o *squema* para ``CAMP_INCENTIVO__REDE_APURAC`` e execute o comando ``dbt run -s int_dpz__metas --full-refresh``, novamente.
-
-Neste momento, confira os dados através da observação dos BI's, abra uma guia no link do dashboard antes de atualizar as fontes de dados e uma outra após atualizar. Repare que os valores irão se alterar, porém, a divergência não deverá ser muito discrepante.
 
 
 
