@@ -218,6 +218,8 @@ ALTER TABLE sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao
 SELECT rlz_elegibilidade_app_mb FROM sdx_excelencia_comercial.camp_incentivo__rede_historico.mrt_apuracao__individual;
 ```
 
+Código completo encontra-se no arquivo ``alter_table.sql`` deste repositório Git.
+
 Feito as devidas correções na estrutura da tabela dos ambientes de desenvolvimento e de produção, é possível seguir com a execução do projeto, a priore, no ambiente de teste.
 
 ### 4.0 Executando o nosso modelo:
@@ -347,7 +349,9 @@ Na sequência, digite o comando a seguir, para transformar o código-fonte em um
 
 Pronto! Agora tem-se dois códigos-fontes transformados em um executável na nuvem.
 
-### 5.6 Configuração do agendamento de DAGs do Airflow: março para maio
+### 6.0 Agendamento de DAGs do Airflow:
+
+### 6.1 Configuração do agendamento de DAGs do Airflow:
 
 A próxima etapa requer paralisar a atualização do projeto *DBT* de março e iniciar a atulização do projeto de maio, o qual está em vigencia. 
 
@@ -364,6 +368,8 @@ docs = """
 # DAG para DBT das campanhas abril e maio 2024
 """
 ```
+
+<img width="248" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/90c1b6b8-dd24-4d51-9dc5-76a9505144e0">
 
 A segunda mudança será alterar as referências que o código faz à campanha de março para maio.
 
@@ -419,21 +425,9 @@ task_dbt_campanha_mai24 = KubernetesPodOperator(
   task_dbt_campanha_hist >> fim
 ```
 
+### 6.2 Salvar Configurações do agendamento de DAGs do Airflow:
 
-<img width="675" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/52cacfca-ee32-4d28-bb72-212e345f161b">
-
-
-
-
-
-
-
-
-
-
-### 6.0 Salvar alterações de agendamento do Airflow:
-
-Feito as alterações no projeto, iremos executar o comando ``Commit`` para salvar as modificações no *Airflow*. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
+Feito as alterações no arquivo python, iremos executar o comando ``Commit`` para salvar as modificações no ***Airflow***. Utilize o atalho ``Ctrl + Shift + G``, novamente, para acessar a guia de controle do código-fonte. No box do ***Airflow***, digite uma mensagem relevante para salvar as alterações e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
 
 <img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
 
@@ -441,6 +435,21 @@ Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
 
 <img width="505" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/746570ee-2159-4fb7-9747-267bf7645631">
 
+Pronto! Os ajustes de agendamento recorrentes foram salvos na *DAG* ``dbt-campanha_incentivo_rede`` do *Airflow*. Para confirmar, basta acessar o link do *[Airflow](https://airflow.real-dev.n-mercantil.com.br/home)*, clicar na *DAG* ``dbt-campanha_incentivo_rede`` e lá você deverá visualizar os projetos *DBTs* de abril e maio, os quais compoem essa *DAG*.
+
+![image](https://github.com/Banco-Mercantil/campaign_update/assets/88452990/e77ec9b1-6c0e-41fb-b10e-007eab24c237)
+
+### 7.0 Migrar dados das tabelas do esquema vigente para as tabelas do esquema apurac:
+
+Nesta fase do projeto, para garantir que os dados referentes a produção do mês de abril não sejam perdidos e os dados da produção do mês de maio possam ser armazenados sem sobreescrever quaisquer informações, é necessário transferir os registros do *esquema vigente* (abril) para o *esquema apurac* (março). 
+
+Visto que os dados produzidos durante o período de março já foram apurados e migrados para as tabelas do *esquema histórico*, os dados das tabelas do *esquema apurac* poderão ser deletados e os dados do mês de abril, que no momento, estão no *esquema vigente* poderão popular agora as tabelas do *esquema apurac*, permitindo assim, que os dados da produção do mês de maio possam ser armazenados sem perdas no *esquema vigente*.
+
+Para isso, vamos acessar o link do *[Snowflake](https://app.snowflake.com/kdumwgr/dda57677/wseLagQNRKh/query)*. Em um worksheet em branco, iremos executar o comando ``TRUNCATE`` no *esquema apurac* e na sequência popular este mesmo esquema com os dados contidos no *esquema vigente* das seguintes tabelas: ``int__participantes_dia_util``, ``int_metas__individuais``, ``int_dpz__metas``, ``int_servicos_meta__geral``, ``int_servicos_prod__geral``. Desta forma limpando os registros de março e transferindo os registros de abril para o esquema apurac.
+
+A título de conferência, a mesma quantidade de linhas existentes nas tabelas do *esquema vigente* agora devem ser idênticos a quantidade de linhas do *esquema apurac*. Execute um ``SELECT COUNT(*) FROM`` em cada esquema para validação.
+
+O **código completo** deste processo, encontra-se no arquivo ``esquema_apuracao.sql`` neste repositório do Git.
 
 
 
@@ -450,110 +459,7 @@ Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
 
 
 
-Feito isso, vamos abrir o arquivo python, novamente, equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
-
-Aqui iremos reverter o processo que já fizemos, comentando a última linha de código ``inicio >> task_dbt_campanha_abr24 >> task_dbt_campanha_hist >> fim`` do arquivo e descomentando o seguinte trecho de código para, na sequência, alterarmos as referências de março para maio.
-
-
-
-### 6.0 Migrar dados do esquema vigente para o esquema apurac:
-
-Nesta fase do projeto, para garantir que os dados referentes ao mês de abril não sejam exibidos e armazenados duplicados na base *histórico* é necessário que realizamos uma limpeza nas tabelas incrementais, eliminando os resíduos do mês de abril, restando apenas os dados do mês da campanha vigente, maio.
-
-Para isso, utilizaremos a seguintes instruções SQL no *Snowflake*, disponíveis no arquivo: ``K:\GEC\2024\04. Dados\0_Snowflake\1_Campanhas\Rede\EXECUTAR_MIG_SCHEMAS_CAMPANHA.txt``:
-
-```
--- TRANSFERE TABELA DE METAS DE EMPRESTIMO
-
-TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_metas__individuais;
-
-    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_metas__individuais   
-
-        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_metas__individuais;
-
--- TRANSFERE TABELA DE PARTICIPANTES POR DIA UTIL        
-
-TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int__participantes_dia_util;
-
-    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int__participantes_dia_util   
-
-        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int__participantes_dia_util;
-
--- TRANSFERE TABELA DE METAS DE DPZ
-
-TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_dpz__metas;
-
-    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_dpz__metas   
-
-        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_dpz__metas;
-
--- TRANSFERE TABELA DE METAS DE SERVIÇOS 
-
-TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_meta__geral;
-
-    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_meta__geral   
-
-        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_meta__geral;
-
--- TRANSFERE TABELA DE PRODUÇÃO DE SERVIÇOS
-
-TRUNCATE TABLE SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_prod__geral;
-
-    INSERT INTO SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_APURAC.int_servicos_prod__geral   
-
-        SELECT * FROM SDX_EXCELENCIA_COMERCIAL.CAMP_INCENTIVO__REDE_VIGENTE.int_servicos_prod__geral;
-```
-
-A próxima etapa é buildar o projeto do mês de abril: ``dbt_efet_campanhas_incentivo_rede_abr24`` . Processo de compilar e montar um programa de computador a partir do código-fonte. Em outras palavras, a *build* é a transformação do código-fonte em um executável ou em um pacote que pode ser implantado em um ambiente de produção.
-
-É necessário certificar que estamos logado na nuvem para fazer qualquer tipo de alteração. Caso queira confirmar execute o código ``aws sso login``.Um pop-up será exibido, e nele, clique o botão *Abrir*.
-
-<img width="292" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/bad2ea14-77a8-422d-8a16-b6402388a3b6">
-
-O sistema irá abrir um navegador da *AWS*, autorize a conexão pelo app *Authenticator*, cliquei no botão *Confirm and continue* para seguir. Na sequência clique em *Allow access*, ao final você deverá receber esta mensagem:
-
-<img width="329" alt="image" src="https://github.com/Banco-Mercantil/ssh_installation/assets/88452990/e14052ca-0c29-4cbe-abb6-8fc0f32b4f79">
-
-Retorne ao *VS Code*, no terminal, entre na pasta do projeto de abril, digitando o seguinte comando:
-
-``cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24``
-
-Na sequência, digite o código:
-
-``.\build_push_dev.sh``
-
-O sistema irá gerar um novo executável após as configurações feitas: migrar o projeto para o esquema ``CAMP_INCENTIVO__REDE_APURAC``. Faremos o mesmo processo para o novo projeto do mês de maio: ``dbt_efet_campanhas_incentivo_rede_mai24``.
-
-No terminal, retorne ao diretorio ``home`` e, em seguida, entre na pasta do projeto de maio, digitando o seguinte comando:
-
-```
-cd 
-```
-
-```
-cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_mai24``
-```
-
-```
-.\build_push_dev.sh
-```
-
-Ao finalizar o processamento da ``build``, vamos salvar as alterações no *Airflow*. 
-
-Vamos abrir o arquivo python equivalente a campanha a qual estamos alterando, neste caso, a campanha *camp_incentivo_rede*. Na ramificação de arquivo, expanda a pasta ``gec_airflow`` e abra o arquivo ``main_dbt_camp_incentivo_rede.py``.
-
-Neste arquivo, no parâmetro ``docs``, iremos passar o valor da mesma mensagem que vamos informar ao comitar o projeto no *Airflow*: 
-
-``DAG para DBT das campanhas abril e maio 2024``.
-
-<img width="248" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/90c1b6b8-dd24-4d51-9dc5-76a9505144e0">
-
-Utilize o atalho ``Ctrl + Shift + G`` para acessar a guia de controle do código-fonte. No box do *Airflow*, digite uma mensagem relevante para salvar as alterações: ``dag campanha abril e maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
-
-<img width="594" alt="image" src="https://github.com/Banco-Mercantil/campaign_update/assets/88452990/91603c66-6012-4ad6-b940-b64ba82828ba">
-
-Na sequência, clique no botão *Sync changes* que aparecerá em seguida.
-
+### 8.0 Salvar alterações:
 Agora vamos salvar as alterações no repositório DevOps ``MB.AWS.BIZ.GED``. No box do repositório,  digite uma mensagem relevante para salvar as alterações: ``campanha de maio 2024`` e clique no botão *Commit*. Um pop-up de confirmação será aberto, basta clicar em *Yes*.
 
 O sistema irá solicitar o usuário (matrícula) e a senha, informe-os, respectivamente, e dê o ``Enter``.
