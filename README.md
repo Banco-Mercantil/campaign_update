@@ -337,7 +337,7 @@ cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_abr24
 Na sequência, digite o comando a seguir, para transformar o código-fonte em um executável:
 
 ```
-.\build_push_dev.sh
+./build_push_dev.sh
 ```
 
 O segundo executável a ser criado será referente ao projeto em vigencia, ``dbt_efet_campanhas_incentivo_rede_mai24``. Acesse sua pasta digitando o seguinte comando: 
@@ -349,7 +349,7 @@ cd MB.AWS.BIZ.GED\1_Campanhas\Rede\dbt_efet_campanhas_incentivo_rede_mai24
 Na sequência, digite o comando a seguir, para transformar o código-fonte em um executável:
 
 ```
-.\build_push_dev.sh
+./build_push_dev.sh
 ```
 
 Pronto! Agora tem-se dois códigos-fontes transformados em um executável na nuvem.
